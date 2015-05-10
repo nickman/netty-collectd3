@@ -1,5 +1,5 @@
-= netty-collectd image:https://secure.travis-ci.org/rhq-project/netty-collectd.svg?branch=master["Build Status", link="https://travis-ci.org/rhq-project/netty-collectd", window="_blank"]
-:linkattrs:
+
+A backport of netty-collectd to Netty 3.
 
 A http://netty.io[Netty, window="_blank"] decoder for the https://collectd.org[collectd, window="_blank"] https://collectd.org/wiki/index.php/Binary_protocol[binary protocol, window="_blank"].
 
