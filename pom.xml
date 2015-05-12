@@ -18,18 +18,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.rhq.metrics.netty</groupId>
-  <artifactId>netty-collectd</artifactId>
+  <groupId>com.heliosapm.metrics.netty</groupId>
+  <artifactId>netty-collectd3</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>netty-collectd</name>
-  <description>A Netty decoder for collectd events.</description>
+  <name>netty-collectd3</name>
+  <description>A Netty decoder for collectd events, back-ported to Netty 3</description>
 
   <scm>
-    <connection>scm:git:git://github.com/rhq-project/netty-collectd.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/rhq-project/netty-collectd.git</developerConnection>
-    <url>https://github.com/rhq-project/netty-collectd</url>
+    <connection>scm:git:https://github.com/nickman/netty-collectd3.git</connection>
+    <developerConnection>scm:git:https://github.com/nickman/netty-collectd3.git</developerConnection>
+    <url>https://github.com/nickman/netty-collectd3</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -43,8 +43,8 @@
   <dependencies>
     <dependency>
       <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-      <version>4.0.24.Final</version>
+      <artifactId>netty</artifactId>
+      <version>3.10.1.Final</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -190,7 +190,7 @@
     </plugins>
   </build>
 
-  <inceptionYear>2014</inceptionYear>
+  <inceptionYear>2015</inceptionYear>
 
   <developers>
     <developer>
@@ -198,6 +198,12 @@
       <name>Thomas Segismont</name>
       <timezone>Europe/Paris</timezone>
     </developer>
+    <developer>
+      <id>nickman</id>
+      <name>Nicholas Whitehead</name>
+      <timezone>North America/New York</timezone>
+    </developer>
+
   </developers>
 
   <organization>
@@ -214,7 +220,7 @@
 
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>https://github.com/rhq-project/netty-collectd/issues</url>
+    <url>https://github.com/nickman/netty-collectd3/issues</url>
   </issueManagement>
 
   <distributionManagement>
@@ -231,3 +237,4 @@
   </distributionManagement>
 
 </project>
+

@@ -16,98 +16,124 @@
 
 package org.rhq.metrics.netty.collectd.event;
 
-import static io.netty.channel.ChannelHandler.Sharable;
 import static org.rhq.metrics.netty.collectd.event.TimeResolution.HIGH_RES;
 import static org.rhq.metrics.netty.collectd.event.TimeResolution.SECONDS;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.util.internal.logging.InternalLogger;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandler;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+import org.jboss.netty.logging.InternalLogger;
+import org.jboss.netty.logging.InternalLoggerFactory;
 import org.rhq.metrics.netty.collectd.packet.CollectdPacket;
 import org.rhq.metrics.netty.collectd.packet.NumericPart;
 import org.rhq.metrics.netty.collectd.packet.Part;
 import org.rhq.metrics.netty.collectd.packet.PartType;
 import org.rhq.metrics.netty.collectd.packet.StringPart;
-import org.rhq.metrics.netty.collectd.packet.Values;
 import org.rhq.metrics.netty.collectd.packet.ValuePart;
+import org.rhq.metrics.netty.collectd.packet.Values;
 
 /**
+ * <p>Title: CollectdEventsDecoder</p>
+ * <p>Description: </p> 
+ * <p>Company: Helios Development Group LLC</p>
  * @author Thomas Segismont
+ * @author Whitehead (nwhitehead AT heliosdev DOT org)
+ * <p><code>org.rhq.metrics.netty.collectd.event.CollectdEventsDecoder</code></p>
  */
-@Sharable
-public final class CollectdEventsDecoder extends MessageToMessageDecoder<CollectdPacket> {
-    private static final InternalLogger logger = InternalLoggerFactory.getInstance(CollectdEventsDecoder.class);
+@ChannelHandler.Sharable
+public final class CollectdEventsDecoder extends OneToOneDecoder {
+    
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(CollectdEventsDecoder.class);
 
-    @Override
-    protected void decode(ChannelHandlerContext context, CollectdPacket packet, List<Object> out) throws Exception {
-        long start = System.currentTimeMillis();
-        String host = null, pluginName = null, pluginInstance = null, typeName = null, typeInstance = null;
-        TimeSpan timestamp = null, interval = null;
-        List<Event> events = new ArrayList<Event>(50);
-        for (Part part : packet.getParts()) {
-            PartType partType = part.getPartType();
-            switch (partType) {
-            case HOST:
-                host = getString(part);
-                break;
-            case PLUGIN:
-                pluginName = getString(part);
-                break;
-            case PLUGIN_INSTANCE:
-                pluginInstance = getString(part);
-                break;
-            case TYPE:
-                typeName = getString(part);
-                break;
-            case INSTANCE:
-                typeInstance = getString(part);
-                break;
-            case TIME:
-                timestamp = new TimeSpan(getLong(part), SECONDS);
-                break;
-            case TIME_HIGH_RESOLUTION:
-                timestamp = new TimeSpan(getLong(part), HIGH_RES);
-                break;
-            case INTERVAL:
-                interval = new TimeSpan(getLong(part), SECONDS);
-                break;
-            case INTERVAL_HIGH_RESOLUTION:
-                interval = new TimeSpan(getLong(part), HIGH_RES);
-                break;
-            case VALUES:
-                Number[] values = getValues(part).getData();
-                ValueListEvent event = new ValueListEvent(host, timestamp, pluginName, pluginInstance, typeName,
-                    typeInstance, values, interval);
-                logger.trace("Decoded ValueListEvent: {}", event);
-                events.add(event);
-                break;
-            default:
-                logger.debug("Skipping unknown part type: {}", partType);
-            }
-        }
+		/**
+		 * {@inheritDoc}
+		 * @see org.jboss.netty.handler.codec.oneone.OneToOneDecoder#decode(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.Channel, java.lang.Object)
+		 */
+		@Override
+		protected Event[] decode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
+			if(msg==null) {
+				return null;
+			}
+			final CollectdPacket[] packets;  //(CollectdPacket)msg;
 
-        if (logger.isTraceEnabled()) {
-            long stop = System.currentTimeMillis();
-            logger.trace("Decoded events in {} ms", stop - start);
-        }
+			if(msg instanceof CollectdPacket[]) {
+				packets = (CollectdPacket[])msg;
+			} else if(msg instanceof CollectdPacket) {
+				packets = new CollectdPacket[]{(CollectdPacket)msg};
+			} else {
+				return null;
+			}
+			
+			final List<Event> events = new ArrayList<Event>(50);
+      long start = System.currentTimeMillis();
+      String host = null, pluginName = null, pluginInstance = null, typeName = null, typeInstance = null;
+      TimeSpan timestamp = null, interval = null;
+      for(final CollectdPacket packet: packets) {
+	      for (final Part<?> part : packet.getParts()) {
+	          final PartType partType = part.getPartType();
+	          switch (partType) {
+	          case HOST:
+	              host = getString(part);
+	              break;
+	          case PLUGIN:
+	              pluginName = getString(part);
+	              break;
+	          case PLUGIN_INSTANCE:
+	              pluginInstance = getString(part);
+	              break;
+	          case TYPE:
+	              typeName = getString(part);
+	              break;
+	          case INSTANCE:
+	              typeInstance = getString(part);
+	              break;
+	          case TIME:
+	              timestamp = new TimeSpan(getLong(part), SECONDS);
+	              break;
+	          case TIME_HIGH_RESOLUTION:
+	              timestamp = new TimeSpan(getLong(part), HIGH_RES);
+	              break;
+	          case INTERVAL:
+	              interval = new TimeSpan(getLong(part), SECONDS);
+	              break;
+	          case INTERVAL_HIGH_RESOLUTION:
+	              interval = new TimeSpan(getLong(part), HIGH_RES);
+	              break;
+	          case VALUES:
+	              Number[] values = getValues(part).getData();
+	              ValueListEvent event = new ValueListEvent(host, timestamp, pluginName, pluginInstance, typeName,
+	                  typeInstance, values, interval);
+	              
+	              logger.debug("Decoded ValueListEvent: " + event);
+	              events.add(event);
+	              break;
+	          default:
+	              logger.debug("Skipping unknown part type: " + partType);
+	          }
+	      }
+      }
+      if (logger.isDebugEnabled()) {
+          long stop = System.currentTimeMillis();
+          logger.debug("Decoded events in " + (stop - start) + " ms");
+      }
 
-        out.addAll(events);
-    }
+      return events.toArray(new Event[0]);
+		}
+	
 
-    private String getString(Part part) {
+    private String getString(final Part<?> part) {
         return ((StringPart) part).getValue();
     }
 
-    private Long getLong(Part part) {
+    private Long getLong(final Part<?> part) {
         return ((NumericPart) part).getValue();
     }
 
-    private Values getValues(Part part) {
+    private Values getValues(final Part<?> part) {
         return ((ValuePart) part).getValue();
     }
 }

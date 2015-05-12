@@ -16,21 +16,19 @@
 
 package org.rhq.metrics.netty.collectd.packet;
 
-import static io.netty.channel.ChannelHandler.Sharable;
-
 import java.math.BigInteger;
+import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.socket.DatagramPacket;
-import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.util.CharsetUtil;
-import io.netty.util.internal.logging.InternalLogger;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandler.Sharable;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+import org.jboss.netty.logging.InternalLogger;
+import org.jboss.netty.logging.InternalLoggerFactory;
+import org.jboss.netty.util.CharsetUtil;
 import org.rhq.metrics.netty.collectd.event.DataType;
 
 /**
@@ -39,87 +37,100 @@ import org.rhq.metrics.netty.collectd.event.DataType;
  * @author Thomas Segismont
  */
 @Sharable
-public final class CollectdPacketDecoder extends MessageToMessageDecoder<DatagramPacket> {
+public final class CollectdPacketDecoder extends OneToOneDecoder {
+	
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(CollectdPacketDecoder.class);
 
     @Override
-    protected void decode(ChannelHandlerContext context, DatagramPacket packet, List<Object> out) throws Exception {
-        long start = System.currentTimeMillis();
-        ByteBuf content = packet.content();
-        List<Part> parts = new ArrayList<Part>(100);
-        for (;;) {
-            if (!hasReadableBytes(content, 4)) {
-                break;
-            }
-            short partTypeId = content.readShort();
-            PartType partType = PartType.findById(partTypeId);
-            int partLength = content.readUnsignedShort();
-            int valueLength = partLength - 4;
-            if (!hasReadableBytes(content, valueLength)) {
-                break;
-            }
-            if (partType == null) {
-                content.skipBytes(valueLength);
-                continue;
-            }
-            Part part;
-            switch (partType) {
-            case HOST:
-            case PLUGIN:
-            case PLUGIN_INSTANCE:
-            case TYPE:
-            case INSTANCE:
-                part = new StringPart(partType, readStringPartContent(content, valueLength));
-                break;
-            case TIME:
-            case TIME_HIGH_RESOLUTION:
-            case INTERVAL:
-            case INTERVAL_HIGH_RESOLUTION:
-                part = new NumericPart(partType, readNumericPartContent(content));
-                break;
-            case VALUES:
-                part = new ValuePart(partType, readValuePartContent(content, valueLength));
-                break;
-            default:
-                part = null;
-                content.skipBytes(valueLength);
-            }
-            //noinspection ConstantConditions
-            if (part != null) {
-                logger.trace("Decoded part: {}", part);
-                parts.add(part);
-            }
+    protected CollectdPacket decode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
+      final long start = System.currentTimeMillis();
+      if(msg==null) return null;
+      if(!(msg instanceof ChannelBuffer)) return null;
+      //final DatagramPacket packet = (DatagramPacket)msg;
+      final ChannelBuffer content = (ChannelBuffer)msg; //ChannelBuffers.wrappedBuffer(packet.getData());
+      final List<Part<?>> parts = new ArrayList<Part<?>>(100);
+//      final List<CollectdPacket> packets = new ArrayList<CollectdPacket>(10);
+      for (;;) {
+        if (!hasReadableBytes(content, 4)) {
+            break;
         }
-
-        if (logger.isTraceEnabled()) {
-            long stop = System.currentTimeMillis();
-            logger.trace("Decoded datagram in {} ms", stop - start);
+        short partTypeId = content.readShort();
+        PartType partType = PartType.findById(partTypeId);
+        int partLength = content.readUnsignedShort();
+        int valueLength = partLength - 4;
+        if (!hasReadableBytes(content, valueLength)) {
+            break;
         }
-
-        if (parts.size() > 0) {
-            CollectdPacket collectdPacket = new CollectdPacket(parts.toArray(new Part[parts.size()]));
-            out.add(collectdPacket);
-        } else {
-            logger.debug("No parts decoded, no CollectdPacket output");
+        if (partType == null) {
+            content.skipBytes(valueLength);
+            continue;
+        }
+        Part<?> part;
+        switch (partType) {
+        case HOST:
+        case PLUGIN:
+        case PLUGIN_INSTANCE:
+        case TYPE:
+        case INSTANCE:
+            part = new StringPart(partType, readStringPartContent(content, valueLength));
+            break;
+        case TIME:
+        case TIME_HIGH_RESOLUTION:
+        case INTERVAL:
+        case INTERVAL_HIGH_RESOLUTION:
+            part = new NumericPart(partType, readNumericPartContent(content));
+            break;
+        case VALUES:
+            part = new ValuePart(partType, readValuePartContent(content, valueLength));
+            break;
+        default:
+            part = null;
+            content.skipBytes(valueLength);
+        }
+        //noinspection ConstantConditions
+        if (part != null) {
+            logger.debug("Decoded part: " + part);
+            parts.add(part);
         }
     }
 
-    private boolean hasReadableBytes(ByteBuf content, int count) {
+    if (logger.isDebugEnabled()) {
+        long stop = System.currentTimeMillis();
+        logger.debug("Decoded datagram in " + (stop - start) + " ms");
+    }
+
+    if (parts.size() > 0) {
+        return new CollectdPacket(parts.toArray(new Part[parts.size()]));
+//        out.add(collectdPacket);
+    } else {
+        logger.debug("No parts decoded, no CollectdPacket output");
+    }
+
+    	
+    	return null;
+    }
+    
+
+    private boolean hasReadableBytes(final ChannelBuffer content, int count) {
         return content.readableBytes() >= count;
     }
 
-    private String readStringPartContent(ByteBuf content, int length) {
+    private String readStringPartContent(final ChannelBuffer content, int length) {
         String string = content.toString(content.readerIndex(), length - 1 /* collectd strings are \0 terminated */,
             CharsetUtil.US_ASCII);
         content.skipBytes(length); // the previous call does not move the readerIndex
         return string;
     }
 
-    private long readNumericPartContent(ByteBuf content) {
+    private long readNumericPartContent(final ChannelBuffer content) {
         return content.readLong();
     }
+    
+    private static long swapLong(final long value) {
+    	return Long.reverseBytes(value);
+    }    
 
-    private Values readValuePartContent(ByteBuf content, int length) {
+    private Values readValuePartContent(final ChannelBuffer content, int length) {
         int beginIndex = content.readerIndex();
         int total = content.readUnsignedShort();
         DataType[] dataTypes = new DataType[total];
@@ -141,10 +152,10 @@ public final class CollectdPacketDecoder extends MessageToMessageDecoder<Datagra
                 data[i] = content.readLong();
                 break;
             case GAUGE:
-                data[i] = Double.longBitsToDouble(ByteBufUtil.swapLong(content.readLong()));
+                data[i] = Double.longBitsToDouble(swapLong(content.readLong()));
                 break;
             default:
-                logger.debug("Skipping unknown data type: {}", dataType);
+                logger.debug("Skipping unknown data type: " + dataType);
             }
         }
         // Skip any additionnal bytes
