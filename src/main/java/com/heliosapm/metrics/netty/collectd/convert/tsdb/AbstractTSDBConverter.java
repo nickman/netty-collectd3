@@ -88,4 +88,10 @@ public abstract class AbstractTSDBConverter implements IConverter<OpenTSDBMetric
 	 * @return The converted metric tags
 	 */
 	protected abstract Map<String, String> getTags(final DataSet dataSet, final DataSource dataSource);
+	
+	/**
+	 * {@inheritDoc}
+	 * @see com.heliosapm.metrics.netty.collectd.convert.IConverter#getConversionPattern()
+	 */
+	public abstract String getConversionPattern();
 }

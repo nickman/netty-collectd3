@@ -66,7 +66,7 @@ public class Server implements ChannelPipelineFactory, ChannelUpstreamHandler {
 	/** The listening port */
 	private int port = 25826;
 	/** The binding interface */
-	private String iface = "127.0.0.1";
+	private String iface = "0.0.0.0"; //"127.0.0.1";
 	/** Indicates if multicast should be enabled */
 	private boolean enableBroadcast = false;
 	

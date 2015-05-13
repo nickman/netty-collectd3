@@ -44,6 +44,12 @@ public interface IConverter<T> {
 	public ConverterType getConverterType();
 	
 	/**
+	 * Returns the original conversion pattern
+	 * @return the original conversion pattern
+	 */
+	public String getConversionPattern();
+	
+	/**
 	 * Converts the passed metric submission to an endpoint specific type instance
 	 * @param value The metric value
 	 * @param timestamp The metric timestamp

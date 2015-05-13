@@ -84,6 +84,12 @@ public final class CollectdPacketDecoder extends OneToOneDecoder {
         case VALUES:
             part = new ValuePart(partType, readValuePartContent(content, valueLength));
             break;
+        case NOTIFICATION:
+        	part = new StringPart(partType, readStringPartContent(content, valueLength));
+        	break;
+        case SEVERITY:
+        	part = new NumericPart(partType, readNumericPartContent(content));
+        	break;
         default:
             part = null;
             content.skipBytes(valueLength);

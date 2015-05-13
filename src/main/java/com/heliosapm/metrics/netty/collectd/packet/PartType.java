@@ -50,7 +50,12 @@ public enum PartType {
      * How often values are collected, in high resolution since epoch.
      * @see com.heliosapm.metrics.netty.collectd.event.TimeResolution#HIGH_RES
      **/
-    INTERVAL_HIGH_RESOLUTION(PartTypeId.INTERVAL_HIGH_RESOLUTION);
+    INTERVAL_HIGH_RESOLUTION(PartTypeId.INTERVAL_HIGH_RESOLUTION),
+    /** A collectd notification */
+    NOTIFICATION(PartTypeId.NOTIFICATION),
+    /** A collectd severity */
+    SEVERITY(PartTypeId.SEVERITY);
+    
 
     private short id;
 
@@ -92,5 +97,8 @@ public enum PartType {
         private static final short VALUES = 0x0006;
         private static final short INTERVAL = 0x0007;
         private static final short INTERVAL_HIGH_RESOLUTION = 0x0009;
+        private static final short NOTIFICATION = 0x0100;
+        private static final short SEVERITY = 0x0101;
+        
     }
 }

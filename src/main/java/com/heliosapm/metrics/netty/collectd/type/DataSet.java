@@ -127,6 +127,19 @@ public class DataSet {
 	}
 	
 	/**
+	 * Returns the named DataSource for this DataSet
+	 * @param name The name of the DataSource
+	 * @return the named DataSource for this DataSet
+	 * @throws DataSourceNotFoundException thrown if the DataSource is not found
+	 */
+	public DataSource getDataSource(final String name) throws DataSourceNotFoundException {
+		if(name==null || name.trim().isEmpty()) throw new IllegalArgumentException("The passed DataSource name was null or empty");
+		final DataSource ds = dataSources.get(name);
+		if(ds==null) throw new DataSourceNotFoundException("Failed to find the DataSource [" + name + "] in the DataSet [" + name + "]");
+		return ds;
+	}
+	
+	/**
 	 * Returns the number of data sources
 	 * @return the number of data sources
 	 */
