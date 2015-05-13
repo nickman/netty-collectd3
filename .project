@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
   <name>netty-collectd3</name>
-  <comment>A Netty decoder for collectd events, back-ported to Netty 3. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <comment>A Netty decoder for collectd events, back-ported to Netty 3</comment>
   <projects/>
   <buildSpec>
     <buildCommand>

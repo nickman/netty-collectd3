@@ -36,6 +36,33 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <compiler-source.version>1.6</compiler-source.version>
+    <compiler-target.version>1.6</compiler-target.version>        
+    <metrics.version>3.1.0</metrics.version>  <!-- 4.0.0-SNAPSHOT -->
+    <opentsdb.version>2.1</opentsdb.version>
+    <ning.version>1.8.14</ning.version>
+    <junit.version>4.12</junit.version>
+    <json.version>20131018</json.version>
+    <high-scale-lib.version>1.1.4</high-scale-lib.version>
+    <guava.version>17.0</guava.version>
+    <netty.version>3.10.1.Final</netty.version>
+    <javassist.version>3.18.2-GA</javassist.version>
+    <jmx-optional.version>1.0-b02-SNAPSHOT</jmx-optional.version>
+    <jackson.version>2.4.3</jackson.version>
+    <async.version>1.4.0</async.version>
+    <slf4j.version>1.7.7</slf4j.version>
+    <logback.version>1.0.13</logback.version>
+    <!-- Plugin Versions -->
+    <compiler-plugin.version>3.2</compiler-plugin.version>
+    <source-plugin.version>2.4</source-plugin.version>
+    <javadoc-plugin.version>2.9.1</javadoc-plugin.version>
+    <findbugs.version>3.0.0</findbugs.version>
+    <jar-plugin.version>2.4</jar-plugin.version>
+    <eclipse-plugin.version>2.9</eclipse-plugin.version>
+    <surefire.version>2.16</surefire.version>
+    <cobertura.version>2.5.1</cobertura.version>
+    <shade.version>2.1</shade.version>        
+
     <maven-javadoc-plugin.version>2.9</maven-javadoc-plugin.version>
     <fastBuild>false</fastBuild>
   </properties>
@@ -44,24 +71,80 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
-      <version>3.10.1.Final</version>
+      <version>${netty.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.0.13</version>      
+      <version>${logback.version}</version>      
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.12</version>
-    </dependency>    
+      <version>${slf4j.version}</version>
+    </dependency>   
+
+    <dependency>
+      <groupId>com.stumbleupon</groupId>
+      <artifactId>async</artifactId>
+      <version>${async.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jdmk</groupId>
+      <artifactId>jmx-optional</artifactId>
+      <version>${jmx-optional.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>${javassist.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-core</artifactId>
+        <version>${metrics.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-jvm</artifactId>
+        <version>${metrics.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.opentsdb</groupId>
+      <artifactId>opentsdb</artifactId>
+      <version>${opentsdb.version}</version>
+    </dependency>
+
+
   </dependencies>
 
   <build>
